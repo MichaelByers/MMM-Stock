@@ -32,10 +32,11 @@ Module.register("MMM-Stock", {
 		var wrapper = document.createElement('marquee');
         var separator = this.config.separator;
 		var count = 0;
-		
+		var _this = this;
 		wrapper.className = 'medium bright';
 
 		var data = this.result;
+		var size = Object.keys(data).length;
 		// the data is not ready
 		if(Object.keys(data).length === 0 && data.constructor === Object){
 			return wrapper;
@@ -59,14 +60,16 @@ Module.register("MMM-Stock", {
 			var current = obj[0];
 			var prev = obj[1];
 			var price = current["4. close"];
-			var change = prev["4. close"] - current["4. close"];
+			var change = current["4. close"] - prev["4. close"];
+			if (symbol == "^GSPC") {symbol = "S&P500";}
+			else if (symbol == "^DJI") {symbol = "DOW";}
+			else if (symbol == "^IXIC") {symbol = "NASDAQ";}
 
 			symbolElement.className = 'stock__stock--symbol';
 			priceElement.className = 'stock__stock--price';
 			changeElement.className = 'stock__stock--change';
 			symbolElement.innerHTML = symbol + ' ';
-			wrapper.appendChild(symbolElement);
-
+			wrapper.appendChild(symbolElement)
 
 			priceElement.innerHTML = '$' + _this.formatMoney(price, 2, '.', ',');
 
@@ -75,12 +78,12 @@ Module.register("MMM-Stock", {
 			} else {
 				changeElement.classList += ' down';
 			}
-
-			changeElement.innerHTML = ' ' + change;
+			var perc = Math.abs((change/prev["4. close"]) * 100);
+			changeElement.innerHTML = ' ' + _this.formatMoney(change, 2, '.', ',') + ' (' + _this.formatMoney(perc, 2, '.', ',') + '%)';
 
 			var divider = document.createElement('span');
 
-			if (count < _this.result.length - 1){
+			if (count < (size - 1)){
 				divider.innerHTML = separator;
 			}
 
