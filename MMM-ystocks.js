@@ -37,18 +37,23 @@ Module.register('MMM-ystocks', { /*eslint-disable-line*/
         var separator = this.config.separator;
 
         wrapper.className = 'medium bright';
-
+        var data = this.result;
+	
         if (this.result.length > 0) {
-            this.result.forEach(function (stock) {
+            for (var key in data) {
+                if (!data.hasOwnProperty(key)) {continue;}
+                var symbol = key;
+                var obj = data[key];
+                var current = obj[0];
+                var prev = obj[1];
+                var price = current["4. close"];
+                var changeValue = prev["4. close"] - current["4. close"];
+
                 var symbolElement = document.createElement('span');
                 var priceElement = document.createElement('span');
                 var changeElement = document.createElement('span');
-                var symbol = stock.symbol;
-                var lastPrice = stock.latestPrice;
-                var changePercentage = stock.changePercent;
-                var changeValue = stock.change;
-
-
+                var lastPrice = current;
+ 
                 symbolElement.className = 'stock__stock--symbol';
                 priceElement.className = 'stock__stock--price';
                 changeElement.className = 'stock__stock--change';
@@ -59,7 +64,7 @@ Module.register('MMM-ystocks', { /*eslint-disable-line*/
                 priceElement.innerHTML = '$' + _this.formatMoney(lastPrice, 2, '.', ',');
 
 
-                if (changePercentage > 0) {
+                if (changeValue > 0) {
                     changeElement.classList += ' up';
                 } else {
                     changeElement.classList += ' down';
