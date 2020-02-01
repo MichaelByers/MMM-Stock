@@ -126,12 +126,12 @@ Module.register('MMM-ystocks', { /*eslint-disable-line*/
 			var url = this.config.baseURL + "query?function=TIME_SERIES_DAILY&outputsize=compact&symbol=" + allCompanies[company] + "&apikey=" + this.config.apikey;
 			urls.push(url);
 		}
-		this.sendSocketNotification("GET_STOCKS", urls);
+		this.sendSocketNotification("GET_YSTOCKS", urls);
 
     },
 
     socketNotificationReceived: function (notification, payload) {
-        if (notification === 'STOCKS_RESULT') {
+        if (notification === 'YSTOCKS_RESULT') {
             this.result = payload;
             this.updateDom(self.config.fadeSpeed);
         }
