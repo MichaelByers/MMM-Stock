@@ -1,15 +1,8 @@
-/* Magic Mirror
- * Module: stocks
- *
- * By Alex Yakhnin https://github.com/alexyak & Elan Trybuch https://github.com/elaniobro
- * MIT Licensed.
- */
-var NodeHelper = require('node_helper');
-var request = require('request');
+var NodeHelper = require("node_helper");
+var request = require("request");
 var async = require("async");
 
 module.exports = NodeHelper.create({
-
 	start: function () {
 		console.log(this.name + " helper method started...");
 	},
@@ -54,18 +47,27 @@ module.exports = NodeHelper.create({
 			if (err) {
 				throw err;
 			}
-			self.sendSocketNotification("YSTOCKS_RESULT", results);
+			self.sendSocketNotification("STOCK_RESULT", results);
 		});
 	},
 
- 
+	sendExchangeRate: function (url) {
+		var self = this;
+
+		request({ url: url, method: "GET" }, function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				var result = JSON.parse(body);
+				self.sendSocketNotification("EXCHANGE_RATE", result);
+			}
+		});
+	},
+
 	//Subclass socketNotificationReceived received.
 	socketNotificationReceived: function(notification, url) {
-		if (notification === "GET_YSTOCKS") {
+		if (notification === "GET_STOCKS") {
 			this.sendRequest(url);
 		} else if(notification === "GET_EXCHANGE_RATE"){
 			this.sendExchangeRate(url);
 		}
 	}
 });
-
