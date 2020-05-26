@@ -9,7 +9,7 @@ Module.register("MMM-Stock", {
 		currency: "usd",
 		separator: "&nbsp;&nbsp;•&nbsp;&nbsp;",
 		baseURL: "https://www.alphavantage.co/",
-		apikey: "IPWULBT54Y3LHJME"
+		apikey: "f123f2dc241e18c2b25c68483ab2069f"
 	},
 
 	getStyles: function() {
@@ -34,7 +34,6 @@ Module.register("MMM-Stock", {
 		var count = 0;
 		var _this = this;
 		wrapper.className = 'medium bright';
-
 		var data = this.result;
 		var size = Object.keys(data).length;
 		// the data is not ready
@@ -49,18 +48,14 @@ Module.register("MMM-Stock", {
 			var requiredCurrency = this.config.currency.toUpperCase();
 		}
 
-		for (var key in data) {
-			if (!data.hasOwnProperty(key)) {continue;}
+        data.forEach(function(key) {
 			var symbolElement = document.createElement('span');
 			var priceElement = document.createElement('span');
 			var changeElement = document.createElement('span');
 
-			var symbol = key;
-			var obj = data[key];
-			var current = obj[0];
-			var prev = obj[1];
-			var price = current["4. close"];
-			var change = current["4. close"] - prev["4. close"];
+			var symbol = key.symbol;
+			var price = key.price;
+			var change = key.change;
 			if (symbol == "^GSPC") {symbol = "S&P500";}
 			else if (symbol == "^DJI") {symbol = "DOW";}
 			else if (symbol == "^IXIC") {symbol = "NASDAQ";}
@@ -78,7 +73,7 @@ Module.register("MMM-Stock", {
 			} else {
 				changeElement.classList += ' down';
 			}
-			var perc = Math.abs((change/prev["4. close"]) * 100);
+			var perc = key.changesPercentage;
 			changeElement.innerHTML = ' ' + _this.formatMoney(change, 2, '.', ',') + ' (' + _this.formatMoney(perc, 2, '.', ',') + '%)';
 
 			var divider = document.createElement('span');
@@ -92,7 +87,7 @@ Module.register("MMM-Stock", {
 			wrapper.appendChild(divider);
 			count++;
 	
-		}
+		});
 
 		return wrapper;
 	},
@@ -133,12 +128,9 @@ Module.register("MMM-Stock", {
 	},
 
 	getStocks: function () {
-		var allCompanies = this.config.companies;
 		var urls = [];
-		for(var company in allCompanies){
-			var url = this.config.baseURL + "query?function=TIME_SERIES_DAILY&outputsize=compact&symbol=" + allCompanies[company] + "&apikey=" + this.config.apikey;
-			urls.push(url);
-		}
+        var url = "https://financialmodelingprep.com/api/v3/quote/" + this.config.companies + "?apikey=" + this.config.apikey;
+		urls.push(url);
 		this.sendSocketNotification("GET_STOCKS", urls);
 	},
 
@@ -146,6 +138,7 @@ Module.register("MMM-Stock", {
 		var url = this.config.baseURL + "?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20('USD" + this.config.currency + "')&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback="
 		this.sendSocketNotification("GET_EXCHANGE_RATE", url);
 	},
+
 	socketNotificationReceived: function(notification, payload) {
 		if (notification === "STOCK_RESULT") {
 			this.result = payload;
