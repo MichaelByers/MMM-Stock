@@ -7,13 +7,17 @@ module.exports = NodeHelper.create({
 		console.log(this.name + " helper method started...");
 	},
 
-	sendRequest: function (urls) {
+	sendRequest: function (urls, host, apikey) {
 		var self = this;
 
 		var results = null;
 
 		async.eachSeries(urls, function(url, done) {
-			request({ url: url, method: "GET" }, function (error, response, body) {
+			request({ url: url, method: "GET", headers: {
+				'x-rapidapi-host': host,
+				'x-rapidapi-key': apikey,
+				useQueryString: true
+			  } }, function (error, response, body) {
 				if (!error && response.statusCode == 200) {
 					results = JSON.parse(body);
 				}
@@ -22,6 +26,7 @@ module.exports = NodeHelper.create({
 
 		}, function(err) {
 			if (err) {
+				console.log(this.name + "ERROR: " + err);
 				throw err;
 			}
 			self.sendSocketNotification("STOCK_RESULT", results);
@@ -40,11 +45,11 @@ module.exports = NodeHelper.create({
 	},
 
 	//Subclass socketNotificationReceived received.
-	socketNotificationReceived: function(notification, url) {
+	socketNotificationReceived: function(notification, urls, host, apikey) {
 		if (notification === "GET_STOCKS") {
-			this.sendRequest(url);
+			this.sendRequest(urls, host, apikey);
 		} else if(notification === "GET_EXCHANGE_RATE"){
-			this.sendExchangeRate(url);
+			this.sendExchangeRate(urls);
 		}
 	}
 });

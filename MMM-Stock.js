@@ -8,8 +8,11 @@ Module.register("MMM-Stock", {
 		companies: ["GOOGL", "YHOO"],
 		currency: "usd",
 		separator: "&nbsp;&nbsp;•&nbsp;&nbsp;",
-		baseURL: "https://www.alphavantage.co/",
-		apikey: "f123f2dc241e18c2b25c68483ab2069f"
+		baseURL: "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/get-quotes",
+		host: "apidojo-yahoo-finance-v1.p.rapidapi.com",
+		apikey: "9301472c86mshf874e2e3e168092p154b4fjsnd9657b45fdb8",
+		region: "US",
+		lang: "en"
 	},
 
 	getStyles: function() {
@@ -54,8 +57,10 @@ Module.register("MMM-Stock", {
 			var changeElement = document.createElement('span');
 
 			var symbol = key.symbol;
-			var price = key.price;
-			var change = key.change;
+			var price = key.regularMarketPrice;
+			var change = key.regularMarketChange;
+			var perc = key.regularMarketChangePercent;
+
 			if (symbol == "^GSPC") {symbol = "S&P500";}
 			else if (symbol == "^DJI") {symbol = "DOW";}
 			else if (symbol == "^IXIC") {symbol = "NASDAQ";}
@@ -73,7 +78,6 @@ Module.register("MMM-Stock", {
 			} else {
 				changeElement.classList += ' down';
 			}
-			var perc = key.changesPercentage;
 			changeElement.innerHTML = ' ' + _this.formatMoney(change, 2, '.', ',') + ' (' + _this.formatMoney(perc, 2, '.', ',') + '%)';
 
 			var divider = document.createElement('span');
@@ -129,9 +133,9 @@ Module.register("MMM-Stock", {
 
 	getStocks: function () {
 		var urls = [];
-        var url = "https://financialmodelingprep.com/api/v3/quote/" + this.config.companies + "?apikey=" + this.config.apikey;
+        var url = this.config.baseURL + "?region=" + this.config.region + "&lang=" + this.config.lang + "&symbols=" + this.config.companies;
 		urls.push(url);
-		this.sendSocketNotification("GET_STOCKS", urls);
+		this.sendSocketNotification("GET_STOCKS", urls, this.config.host, this.config.apikey);
 	},
 
 	getExchangeRate: function () {
