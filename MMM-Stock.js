@@ -133,9 +133,20 @@ Module.register("MMM-Stock", {
 
 	getStocks: function () {
 		var urls = [];
-        var url = this.config.baseURL + "?region=" + this.config.region + "&lang=" + this.config.lang + "&symbols=" + this.config.companies;
-		urls.push(url);
-		this.sendSocketNotification("GET_STOCKS", urls, this.config.host, this.config.apikey);
+		var options = {
+			method: 'GET',
+			url: this.config.baseURL,
+			qs: {region: this.config.region, lang: this.config.lang, symbols: this.config.companies},
+			headers: {
+			  'x-rapidapi-host': this.config.host,
+			  'x-rapidapi-key': this.config.apikey,
+			  useQueryString: true
+			}
+		  };
+		  
+        //var url = this.config.baseURL + "?region=" + this.config.region + "&lang=" + this.config.lang + "&symbols=" + this.config.companies;
+		urls.push(options);
+		this.sendSocketNotification("GET_STOCKS", urls);
 	},
 
 	getExchangeRate: function () {
