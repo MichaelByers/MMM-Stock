@@ -5,12 +5,11 @@ Module.register("MMM-Stock", {
 	defaults: {
 		updateInterval: 60000,
 		fadeSpeed: 1000,
-		companies: ["GOOGL", "YHOO"],
+		companies: "GOOGL,YHOO",
 		currency: "usd",
 		separator: "&nbsp;&nbsp;•&nbsp;&nbsp;",
 		baseURL: "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/get-quotes",
 		host: "apidojo-yahoo-finance-v1.p.rapidapi.com",
-		apikey: "9301472c86mshf874e2e3e168092p154b4fjsnd9657b45fdb8",
 		region: "US",
 		lang: "en"
 	},
@@ -25,9 +24,6 @@ Module.register("MMM-Stock", {
 
 	start: function() {
 		this.getStocks();
-		if(this.config.currency.toLowerCase() != "usd"){
-			this.getExchangeRate();
-		}
 		this.scheduleUpdate();
 	},
 
@@ -125,9 +121,6 @@ Module.register("MMM-Stock", {
 		var that = this;
 		setInterval(function() {
 			that.getStocks();
-			if(that.config.currency.toLowerCase() != "usd"){
-				that.getExchangeRate();
-			}
 		}, loadTime);
 	},
 
@@ -156,7 +149,7 @@ Module.register("MMM-Stock", {
 
 	socketNotificationReceived: function(notification, payload) {
 		if (notification === "STOCK_RESULT") {
-			this.result = payload;
+			this.result = payload.quoteResponse.result;
 			this.updateDom(self.config.fadeSpeed);
 		} else if(notification === "EXCHANGE_RATE"){
 			this.rate = payload;
