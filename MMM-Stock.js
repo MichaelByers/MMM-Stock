@@ -3,7 +3,7 @@
 Module.register("MMM-Stock", {
 	result: {},
 	defaults: {
-		updateInterval: 60000,
+		updateInterval: 1800000, // 500 calls per month limit
 		fadeSpeed: 1000,
 		companies: "GOOGL,YHOO",
 		currency: "usd",
@@ -14,6 +14,11 @@ Module.register("MMM-Stock", {
 		lang: "en"
 	},
 
+    // Define required scripts.
+	getScripts: function() {
+		return ["moment.js"];
+	},
+	
 	getStyles: function() {
 		return ["MMM-Stock.css"];
 	},
@@ -137,9 +142,14 @@ Module.register("MMM-Stock", {
 			}
 		  };
 		  
-        //var url = this.config.baseURL + "?region=" + this.config.region + "&lang=" + this.config.lang + "&symbols=" + this.config.companies;
-		urls.push(options);
-		this.sendSocketNotification("GET_STOCKS", urls);
+        urls.push(options);
+		// only get stocks in trading hours, to conserve # api calls
+		var hour = moment().hour();
+		var day = moment().day();
+
+		if( (hour >= 7) && (hour <=14) && (day != 0) && (day != 6) ) {
+			this.sendSocketNotification("GET_STOCKS", urls);
+		}
 	},
 
 	getExchangeRate: function () {
