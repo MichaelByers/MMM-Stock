@@ -12,7 +12,7 @@ To use this module, add it to the modules array in the `config/config.js` file:
     		module: "MMM-Stock",
     		position: "top_left",
     		config: {
-    			companies: "MSFT,GOOG,ORCL,FB,AAPL",
+                companies: "MSFT,GOOG,ORCL,FB,AAPL",
                 apikey: xxxx
     		}
 }
