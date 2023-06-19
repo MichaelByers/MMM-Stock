@@ -1,6 +1,6 @@
 var NodeHelper = require("node_helper");
-var request = require("request");
-var async = require("async");
+var axios = require('axios').default;
+var moment = require("moment");
 
 module.exports = NodeHelper.create({
 	start: function () {
@@ -9,40 +9,40 @@ module.exports = NodeHelper.create({
 
 	sendRequest: function (urls) {
 		var self = this;
-
-		var results = null;
-
-		async.eachSeries(urls, function(url, done) {
-			request(url, function (error, response, body) {
-				if (!error && response.statusCode == 200) {
-					results = JSON.parse(body);
+		console.log( "[MMM-Stock] " + moment().format("D-MMM-YY HH:mm") + " making URL calls" );
+		//urls is an array of options, only using 1 for now
+		axios(urls[0])
+			.then(function (response) {
+				if (response.status == 200) {
+					self.sendSocketNotification("STOCK_RESULT", response.data);
 				}
-				done();
-			});
-
-		}, function(err) {
-			if (err) {
-				console.log(this.name + "ERROR: " + err);
-				throw err;
-			}
-			self.sendSocketNotification("STOCK_RESULT", results);
+			})
+			.catch(function (error) {
+				// handle error
+				console.log( "[MMM-Stock] " + moment().format("D-MMM-YY HH:mm") + " Request " + error );
 		});
 	},
 
 	sendExchangeRate: function (url) {
 		var self = this;
 
-		request({ url: url, method: "GET" }, function (error, response, body) {
-			if (!error && response.statusCode == 200) {
-				var result = JSON.parse(body);
-				self.sendSocketNotification("EXCHANGE_RATE", result);
+		axios.get(url)
+			.then(function (response) {
+			if (response.status == 200) {
+				self.sendSocketNotification("EXCHANGE_RATE", response.data);
 			}
-		});
+			})
+			.catch(function (error) {
+				// handle error
+				console.log( "[MMM-Stock] Exchange Rate " + moment().format("D-MMM-YY HH:mm") + " Exchange " + error );
+			});
+
 	},
 
 	//Subclass socketNotificationReceived received.
 	socketNotificationReceived: function(notification, urls) {
 		if (notification === "GET_STOCKS") {
+//			console.log( "[MMM-Stock] " + moment().format("D-MMM-YY HH:mm") + " sending requests: "+JSON.stringify(urls, null, 4) );
 			this.sendRequest(urls);
 		} else if(notification === "GET_EXCHANGE_RATE"){
 			this.sendExchangeRate(urls);

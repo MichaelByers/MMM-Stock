@@ -8,7 +8,7 @@ Module.register("MMM-Stock", {
 		companies: "GOOGL,YHOO",
 		currency: "usd",
 		separator: "&nbsp;&nbsp;•&nbsp;&nbsp;",
-		baseURL: "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/get-quotes",
+		baseURL: "https://apidojo-yahoo-finance-v1.p.rapidapi.com/market/v2/get-quotes",
 		host: "apidojo-yahoo-finance-v1.p.rapidapi.com",
 		region: "US",
 		lang: "en"
@@ -18,7 +18,7 @@ Module.register("MMM-Stock", {
 	getScripts: function() {
 		return ["moment.js"];
 	},
-	
+
 	getStyles: function() {
 		return ["MMM-Stock.css"];
 	},
@@ -28,6 +28,7 @@ Module.register("MMM-Stock", {
 	},
 
 	start: function() {
+		console.log('Starting module: ' + this.name);
 		this.getStocks();
 		this.scheduleUpdate();
 	},
@@ -62,6 +63,9 @@ Module.register("MMM-Stock", {
 			var change = key.regularMarketChange;
 			var perc = key.regularMarketChangePercent;
 
+			//debug
+			console.log("[STOCK] reading " + symbol);
+
 			if (symbol == "^GSPC") {symbol = "S&P500";}
 			else if (symbol == "^DJI") {symbol = "DOW";}
 			else if (symbol == "^IXIC") {symbol = "NASDAQ";}
@@ -91,7 +95,7 @@ Module.register("MMM-Stock", {
 			wrapper.appendChild(changeElement);
 			wrapper.appendChild(divider);
 			count++;
-	
+
 		});
 
 		return wrapper;
@@ -132,22 +136,22 @@ Module.register("MMM-Stock", {
 	getStocks: function () {
 		var urls = [];
 		var options = {
-			method: 'GET',
+			method: 'get',
 			url: this.config.baseURL,
-			qs: {region: this.config.region, lang: this.config.lang, symbols: this.config.companies},
+			params: {region: this.config.region, lang: this.config.lang, symbols: this.config.companies},
 			headers: {
 			  'x-rapidapi-host': this.config.host,
 			  'x-rapidapi-key': this.config.apikey,
 			  useQueryString: true
 			}
 		  };
-		  
+
         urls.push(options);
 		// only get stocks in trading hours, to conserve # api calls
 		var hour = moment().hour();
 		var day = moment().day();
 
-		if( (hour >= 7) && (hour <=14) && (day != 0) && (day != 6) ) {
+		if( (hour >= 7) && (hour <=17) && (day != 0) && (day != 6) ) {
 			this.sendSocketNotification("GET_STOCKS", urls);
 		}
 	},
